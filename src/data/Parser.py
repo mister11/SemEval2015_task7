@@ -5,7 +5,7 @@ from src.data.Models import TextPeriod, TextEntry
 import re
 
 
-def parse(*file_names):
+def parse(file_names):
 	text_entries = []
 	for file_name in file_names:
 		text_entries.extend(__parse_file(file_name))
