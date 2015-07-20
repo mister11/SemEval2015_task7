@@ -6,6 +6,8 @@ from nltk.stem import PorterStemmer
 from src.data import Parser
 import re
 import numpy as np
+import os.path as path
+from src.serialization import Serializer
 
 STOPWORDS_LANGUAGE = 'english'
 
@@ -19,6 +21,8 @@ COARSE_GRANULARITY = 'textC'
 LOWER_YEAR_BOUND = 1700
 UPPER_YEAR_BOUND = 2014
 
+
+NCHARS_LOCATION = '../../data/saves/'
 
 class Preprocessor:
 	def __init__(self, *filenames):
@@ -50,6 +54,21 @@ class Preprocessor:
 			labels_lower.append(chosen_time_span[LOWER_YEAR])
 			labels_upper.append(chosen_time_span[UPPER_YEAR])
 		return labels_lower, labels_upper
+
+	def getNChars(self, sizes=(2, 3), freq_threshold=0, remove_stopwords=True):
+		filename = NCHARS_LOCATION + '_size ' + str(sizes)
+		if path.exists(filename):
+			return Serializer.load_object(filename)
+		texts = self.__remove_punctuations(self.__extract_text())
+		nchars = {}
+		for text in texts:
+			words = text.split()
+			if remove_stopwords:
+				words = self.__remove_stopwords(words)
+			self.__extract_nchars(words, sizes, nchars)
+		final_nchars = [nchar for nchar, nchar_freq in nchars.items() if nchar_freq > freq_threshold]
+		Serializer.save_object(filename, final_nchars)
+		return final_nchars
 
 	def __extract_text(self):
 		return [entry.body.lower() for entry in self.entries]
@@ -100,7 +119,14 @@ class Preprocessor:
 		# take time span for which intersection is largest
 		return custom_time_spans[np.argmax(intersecs)]
 
+	def __extract_nchars(self, words, sizes, nchars):
+		for word in words:
+			for size in sizes:
+				curr_nchars = [word[i:i + size] for i in range(len(word) - size + 1)]
+				for curr_nchar in curr_nchars:
+					nchars[curr_nchar] = nchars.get(curr_nchar, 0) + 1
 
 if __name__ == '__main__':
 	p = Preprocessor('../../data/t1data/trialT1.txt')
 	p.get_clean_data()
+	p.getNChars()
