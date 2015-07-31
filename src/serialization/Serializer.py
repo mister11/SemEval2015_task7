@@ -2,8 +2,11 @@
 __author__ = 'Sven Vidak'
 
 import pickle
+import os
 
 def save_object(filename, obj):
+	if not os.path.exists(filename):
+		os.makedirs(filename)
 	pickle.dump(obj, open(filename, mode='wb'))
 
 def load_object(filename):

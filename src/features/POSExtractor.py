@@ -4,7 +4,7 @@ __author__ = 'Sven Vidak'
 import numpy as np
 import os.path as path
 from collections import Counter
-from nltk.tag.stanford import POSTagger
+from nltk.tag.stanford import StanfordPOSTagger
 from src.serialization import Serializer
 
 POS_TAGS = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT',
@@ -27,7 +27,7 @@ class POSExtractor:
 		filename = 'POS_vectors_' + self.desc
 		if path.exists(filename):
 			return Serializer.load_object(filename)
-		tagger = POSTagger(POS_MODEL, POS_JAR, java_options='-mx4000m')
+		tagger = StanfordPOSTagger(POS_MODEL, POS_JAR, java_options='-mx4000m')
 		texts = self.preprocessor.get_raw_words()
 		num_of_tags = len(POS_TAGS)
 		tag_vectors = []

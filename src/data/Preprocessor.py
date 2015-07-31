@@ -4,8 +4,11 @@ __author__ = 'Sven Vidak'
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from src.data import Parser
+from src.util import Utils
+from src.serialization import Serializer
 import re
 import numpy as np
+import os
 
 STOPWORDS_LANGUAGE = 'english'
 
@@ -27,6 +30,9 @@ class Preprocessor:
 		self.stemmer = PorterStemmer()
 
 	def get_clean_data(self):
+		filename = Utils.DATA_LOCATION + 'clean_data'
+		if os.path.exists(filename):
+			return Serializer.load_object(filename)
 		lowercase_texts = self.__extract_text()
 		clean_texts = self.__remove_punctuations(lowercase_texts)
 
@@ -37,9 +43,13 @@ class Preprocessor:
 			words = self.__stem_words(words)
 			clean_data.append(' '.join(words))
 
+		Serializer.save_object(filename, clean_data)
 		return clean_data
 
 	def get_custom_labels(self, year_type):
+		filename = Utils.DATA_LOCATION + 'custom_labels'
+		if os.path.exists(filename):
+			return Serializer.load_object(filename)
 		text_periods = self.__get_time_periods(year_type)
 		time_span_length = self.__get_time_span_length(text_periods[0])
 		custom_time_spans = self.__generate_custom_time_spans(time_span_length)
@@ -49,10 +59,18 @@ class Preprocessor:
 			chosen_time_span = self.__find_correct_time_span(curr_time_span, custom_time_spans)
 			labels_lower.append(chosen_time_span[LOWER_YEAR])
 			labels_upper.append(chosen_time_span[UPPER_YEAR])
+
+		Serializer.save_object(filename, (labels_lower, labels_upper))
 		return labels_lower, labels_upper
 
 	def get_raw_words(self):
-		return self.__remove_punctuations(self.__extract_text())
+		""" converts text to lowercase and removes all but letters/words and numbers """
+		filename = Utils.DATA_LOCATION + 'raw_words'
+		if os.path.exists(filename):
+			return Serializer.load_object(filename)
+		raw_words = self.__remove_punctuations(self.__extract_text())
+		Serializer.save_object(filename, raw_words)
+		return raw_words
 
 	def remove_stopwords(self, words):
 		return [word for word in words if self.__is_not_stopword(word)]
