@@ -23,7 +23,7 @@ class POSExtractor:
 		self.preprocessor = preprocessor
 		self.desc = desc
 
-	def getPOSTagVectors(self):
+	def get_pos_tag_vectors(self):
 		filename = 'POS_vectors_' + self.desc
 		if path.exists(filename):
 			return Serializer.load_object(filename)

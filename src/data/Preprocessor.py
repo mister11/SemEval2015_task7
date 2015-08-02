@@ -24,7 +24,7 @@ UPPER_YEAR_BOUND = 2014
 
 
 class Preprocessor:
-	def __init__(self, *filenames):
+	def __init__(self, filenames):
 		self.entries = Parser.parse(filenames)
 		self.stopwords = set(stopwords.words(STOPWORDS_LANGUAGE))
 		self.stemmer = PorterStemmer()

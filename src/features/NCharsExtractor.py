@@ -11,18 +11,18 @@ from src.util import Utils
 
 class NCharsExtractor:
 
-	def __init__(self, preprocessor, sizes, freq_threshold, remove_stopwords=True):
+	def __init__(self, preprocessor, sizes=(2,3), freq_threshold=1, remove_stopwords=True):
 		self.preprocessor = preprocessor
 		self.sizes = sizes
 		self.freq_threshold = freq_threshold
 		self.remove_stopwords = remove_stopwords
 		self.texts = None
 
-	def get_n_char_vectors(self):
+	def get_n_char_vectors(self, vocabulary):
 		filename = self.__get_filename(Utils.N_CHAR_VECTORS)
 		if path.exists(filename):
 			return Serializer.load_object(filename)
-		n_chars = self.__get_n_chars()
+		n_chars = self.__get_n_chars(vocabulary)
 		n_char_vecs = []
 		n_char_count = len(n_chars)
 		self.texts = self.preprocessor.get_raw_words() if self.texts is None else self.texts
@@ -38,11 +38,11 @@ class NCharsExtractor:
 							n_char_vec[n_chars.index(n_char)] = freq / len(words)  # py3 does division right!
 			n_char_vecs.append(n_char_vec)
 
-		numpy_array = np.array(n_char_vecs) # creates numpy array from python array
-		Serializer.save_object(filename, numpy_array)
-		return numpy_array
+		n_char_vecs_np = np.array(n_char_vecs)
+		Serializer.save_object(filename, n_char_vecs_np)
+		return n_char_vecs_np
 
-	def __get_n_chars(self):
+	def __get_n_chars(self, vocabulary):
 		filename = self.__get_filename(Utils.N_CHARS_LOCATION)
 		if path.exists(filename):
 			return Serializer.load_object(filename)
@@ -53,7 +53,8 @@ class NCharsExtractor:
 			if self.remove_stopwords:
 				words = self.preprocessor.remove_stopwords(words)
 			self.__extract_n_chars(words, n_chars)
-		final_n_chars = self.__filter_by_freq_threshold(n_chars)
+		n_chars_freq = self.__filter_by_freq_threshold(n_chars)
+		final_n_chars = self.__filter_by_vocabulary(n_chars_freq, vocabulary)
 		Serializer.save_object(filename, final_n_chars)
 		return final_n_chars
 
@@ -66,6 +67,9 @@ class NCharsExtractor:
 
 	def __filter_by_freq_threshold(self, n_chars):
 		return [n_char for n_char, n_char_freq in n_chars.items() if n_char_freq > self.freq_threshold]
+
+	def __filter_by_vocabulary(self, n_chars, vocabulary):
+		return [n_char for n_char in n_chars if n_char not in vocabulary]
 
 	def __get_filename(self, base):
 		return base + 'size_' + str(self.sizes) + '_thresh_' + str(self.freq_threshold) \
