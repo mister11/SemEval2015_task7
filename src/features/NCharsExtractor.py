@@ -11,17 +11,18 @@ from src.util import Utils
 
 class NCharsExtractor:
 
-	def __init__(self, preprocessor, sizes=(2,3), freq_threshold=1, remove_stopwords=True):
+	def __init__(self, preprocessor, sizes=(2, 3), freq_threshold=1, remove_stopwords=True, train_set=True):
 		self.preprocessor = preprocessor
 		self.sizes = sizes
 		self.freq_threshold = freq_threshold
 		self.remove_stopwords = remove_stopwords
+		self.train_set = True
 		self.texts = None
 
 	def get_n_char_vectors(self, vocabulary):
-		filename = self.__get_filename(Utils.N_CHAR_VECTORS)
-		if path.exists(filename):
-			return Serializer.load_object(filename)
+		filename = self.__get_filename()
+		if path.exists(Utils.POS_TAG_VECTORS + filename):
+			return Serializer.load_object(Utils.POS_TAG_VECTORS, filename)
 		n_chars = self.__get_n_chars(vocabulary)
 		n_char_vecs = []
 		n_char_count = len(n_chars)
@@ -39,13 +40,13 @@ class NCharsExtractor:
 			n_char_vecs.append(n_char_vec)
 
 		n_char_vecs_np = np.array(n_char_vecs)
-		Serializer.save_object(filename, n_char_vecs_np)
+		Serializer.save_object(Utils.N_CHAR_VECTORS, filename, n_char_vecs_np)
 		return n_char_vecs_np
 
 	def __get_n_chars(self, vocabulary):
-		filename = self.__get_filename(Utils.N_CHARS_LOCATION)
-		if path.exists(filename):
-			return Serializer.load_object(filename)
+		filename = self.__get_filename()
+		if path.exists(Utils.N_CHARS_LOCATION + filename):
+			return Serializer.load_object(Utils.N_CHARS_LOCATION, filename)
 		self.texts = self.preprocessor.get_raw_words() if self.texts is None else self.texts
 		n_chars = {}
 		for text in self.texts:
@@ -55,7 +56,7 @@ class NCharsExtractor:
 			self.__extract_n_chars(words, n_chars)
 		n_chars_freq = self.__filter_by_freq_threshold(n_chars)
 		final_n_chars = self.__filter_by_vocabulary(n_chars_freq, vocabulary)
-		Serializer.save_object(filename, final_n_chars)
+		Serializer.save_object(Utils.N_CHARS_LOCATION, filename, final_n_chars)
 		return final_n_chars
 
 	def __extract_n_chars(self, words, n_chars):
@@ -71,6 +72,7 @@ class NCharsExtractor:
 	def __filter_by_vocabulary(self, n_chars, vocabulary):
 		return [n_char for n_char in n_chars if n_char not in vocabulary]
 
-	def __get_filename(self, base):
-		return base + 'size_' + str(self.sizes) + '_thresh_' + str(self.freq_threshold) \
-		            + '_rm_stopwords_' + str(self.remove_stopwords)
+	def __get_filename(self):
+		set_type = 'train' if self.train_set else 'test'
+		return 'size_' + str(self.sizes) + '_thresh_' + str(self.freq_threshold) \
+		            + '_rm_stopwords_' + str(self.remove_stopwords) + '_' + set_type + '.ser'

@@ -1,7 +1,7 @@
 # Created by svenko11 on 7/31/15 9:52 PM
 __author__ = 'Sven Vidak'
 
-MAIN_DATA_FOLDER = '../../data/'
+MAIN_DATA_FOLDER = '../data/'
 PICKLE_LOCATION = MAIN_DATA_FOLDER + 'pickles/'
 
 # n_chars pickles

@@ -4,10 +4,10 @@ __author__ = 'Sven Vidak'
 import pickle
 import os
 
-def save_object(filename, obj):
-	if not os.path.exists(filename):
-		os.makedirs(filename)
-	pickle.dump(obj, open(filename, mode='wb'))
+def save_object(directroy, filename, obj):
+	if not os.path.exists(directroy):
+		os.makedirs(directroy)
+	pickle.dump(obj, open(directroy + filename, mode='wb'))
 
-def load_object(filename):
-	return pickle.load(open(filename, mode='rb'))
+def load_object(directory, filename):
+	return pickle.load(open(directory + filename, mode='rb'))

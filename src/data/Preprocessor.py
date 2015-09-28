@@ -30,9 +30,9 @@ class Preprocessor:
 		self.stemmer = PorterStemmer()
 
 	def get_clean_data(self):
-		filename = Utils.DATA_LOCATION + 'clean_data'
-		if os.path.exists(filename):
-			return Serializer.load_object(filename)
+		filename = 'clean_data.ser'
+		if os.path.exists(Utils.DATA_LOCATION + filename):
+			return Serializer.load_object(Utils.DATA_LOCATION, filename)
 		lowercase_texts = self.__extract_text()
 		clean_texts = self.__remove_punctuations(lowercase_texts)
 
@@ -43,13 +43,13 @@ class Preprocessor:
 			words = self.__stem_words(words)
 			clean_data.append(' '.join(words))
 
-		Serializer.save_object(filename, clean_data)
+		Serializer.save_object(Utils.DATA_LOCATION, filename, clean_data)
 		return clean_data
 
 	def get_custom_labels(self, year_type):
-		filename = Utils.DATA_LOCATION + 'custom_labels'
-		if os.path.exists(filename):
-			return Serializer.load_object(filename)
+		filename = 'custom_labels_' + year_type + '.ser'
+		if os.path.exists(Utils.DATA_LOCATION + filename):
+			return Serializer.load_object(Utils.DATA_LOCATION, filename)
 		text_periods = self.__get_time_periods(year_type)
 		time_span_length = self.__get_time_span_length(text_periods[0])
 		custom_time_spans = self.__generate_custom_time_spans(time_span_length)
@@ -60,16 +60,16 @@ class Preprocessor:
 			labels_lower.append(chosen_time_span[LOWER_YEAR])
 			labels_upper.append(chosen_time_span[UPPER_YEAR])
 
-		Serializer.save_object(filename, (labels_lower, labels_upper))
+		Serializer.save_object(Utils.DATA_LOCATION, filename, (labels_lower, labels_upper))
 		return labels_lower, labels_upper
 
 	def get_raw_words(self):
 		""" converts text to lowercase and removes all but letters/words and numbers """
-		filename = Utils.DATA_LOCATION + 'raw_words'
-		if os.path.exists(filename):
-			return Serializer.load_object(filename)
+		filename = 'raw_words.ser'
+		if os.path.exists(Utils.DATA_LOCATION + filename):
+			return Serializer.load_object(Utils.DATA_LOCATION, filename)
 		raw_words = self.__remove_punctuations(self.__extract_text())
-		Serializer.save_object(filename, raw_words)
+		Serializer.save_object(Utils.DATA_LOCATION, filename, raw_words)
 		return raw_words
 
 	def remove_stopwords(self, words):
@@ -102,7 +102,7 @@ class Preprocessor:
 		return time_span[1] - time_span[0]
 
 	def __remove_punctuations(self, texts):
-		return map(lambda text: re.sub(r"[^a-zA-Z0-9\-]", " ", text), texts)
+		return list(map(lambda text: re.sub(r"[^a-zA-Z0-9\-]", " ", text), texts))
 
 	def __generate_custom_time_spans(self, time_span_length):
 		spans = []
