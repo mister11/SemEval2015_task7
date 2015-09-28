@@ -1,8 +1,6 @@
 # Created by svenko11 on 7/25/15 9:31 PM
 __author__ = 'Sven Vidak'
 
-from scipy.sparse import hstack
-
 from sklearn.grid_search import GridSearchCV
 
 def train(classifier, data):

@@ -16,13 +16,13 @@ class NCharsExtractor:
 		self.sizes = sizes
 		self.freq_threshold = freq_threshold
 		self.remove_stopwords = remove_stopwords
-		self.train_set = True
+		self.train_set = train_set
 		self.texts = None
 
 	def get_n_char_vectors(self, vocabulary):
 		filename = self.__get_filename()
-		if path.exists(Utils.POS_TAG_VECTORS + filename):
-			return Serializer.load_object(Utils.POS_TAG_VECTORS, filename)
+		if path.exists(Utils.N_CHAR_VECTORS + filename):
+			return Serializer.load_object(Utils.N_CHAR_VECTORS, filename)
 		n_chars = self.__get_n_chars(vocabulary)
 		n_char_vecs = []
 		n_char_count = len(n_chars)
@@ -75,4 +75,4 @@ class NCharsExtractor:
 	def __get_filename(self):
 		set_type = 'train' if self.train_set else 'test'
 		return 'size_' + str(self.sizes) + '_thresh_' + str(self.freq_threshold) \
-		            + '_rm_stopwords_' + str(self.remove_stopwords) + '_' + set_type + '.ser'
+		        + '_rm_stopwords_' + str(self.remove_stopwords) + '_' + set_type + '.ser'

@@ -33,8 +33,8 @@ class Preprocessor:
 		filename = 'clean_data.ser'
 		if os.path.exists(Utils.DATA_LOCATION + filename):
 			return Serializer.load_object(Utils.DATA_LOCATION, filename)
-		lowercase_texts = self.__extract_text()
-		clean_texts = self.__remove_punctuations(lowercase_texts)
+
+		clean_texts = self.get_raw_words()
 
 		clean_data = []
 		for text in clean_texts:
